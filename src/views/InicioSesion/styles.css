@@ -36,7 +36,7 @@ h2 {
 .btn-primary {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #b59434;
     color: white;
     border: none;
     border-radius: 5px;
@@ -44,7 +44,7 @@ h2 {
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
+    background-color: #e0b942;
 }
 
 .error-text {
@@ -63,7 +63,7 @@ h2 {
 }
 
 .register-link a {
-    color: #007bff;
+    color: #b59434;
     text-decoration: none;
 }
 
