@@ -22,7 +22,9 @@ function App() {
           <Route exact path="/register" element={<Registro />} />
         </Routes>   
       </main>
+      <footer>
       <Footer />
+      </footer>
     </AuthProvider>
   );
 }
