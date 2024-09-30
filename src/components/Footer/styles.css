@@ -17,7 +17,7 @@
 
 .footer-links a,
 .social-media a {
-    color: white;
+    color: #b59434;
     text-decoration: none;
     margin: 0 15px;
     transition: color 0.3s;
@@ -25,5 +25,5 @@
 
 .footer-links a:hover,
 .social-media a:hover {
-    color: #61dafb;
+    color: #7c5c1f ;
 }
