@@ -2,9 +2,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #342829;
+    background-color: #241c23;
     padding: 10px 20px;
-    color: white;
+    color: #b59434 ;
 }
 
 .navbar-logo img {
