@@ -4,132 +4,60 @@ import config from '../../config';
 import FormInput from '../../components/FormInput'; 
 import "./styles.css";
 
-const ListadoEventos = () => {
-    const [events, setEvents] = useState([]);
-    const [page, setPage] = useState(1); 
-    const [limit] = useState(10);
-    const [total, setTotal] = useState(0);
-    const [filters, setFilters] = useState({
-        tag: '',
-        startDate: '',
-        name: '',
-        category: ''
-    });
-    const [applyFilters, setApplyFilters] = useState(false);  
-    const fetchEvents = async () => {
-        const { name = '', tag = '', category = '' } = filters;
-        let queryParams = [];
+const DetalleEvento = ({ eventId }) => {
+    const [eventDetails, setEventDetails] = useState(null);
+    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [error, setError] = useState('');
 
-        if (name.trim()) queryParams.push(`name=${name}`);
-        if (tag.trim()) queryParams.push(`tag=${tag}`);
-        if (filters.startDate.trim()) {
-            const formattedDate = new Date(filters.startDate).toISOString().split('T')[0];
-            queryParams.push(`startdate=${formattedDate}`);
-        }
-        if (category.trim()) queryParams.push(`category=${category}`);
-        queryParams.push(`page=${page}`);
-        queryParams.push(`limit=${limit}`);
-        const queryString = queryParams.length ? `?${queryParams.join('&')}` : '';
-        console.log('Fetching data with query:', `${config.url}api/event${queryString}`);
-        try {
-            const response = await axios.get(`${config.url}api/event${queryString}`);
-            const eventsData = response?.data?.collection || [];
-            setEvents(eventsData);
-            const totalEvents = response?.data?.pagination?.total || 0;
-            setTotal(totalEvents);
-        } catch (error) {
-            console.error('Error fetching events:', error);
-            setEvents([]);
-            setTotal(0);
-        }
-    };
     useEffect(() => {
-        fetchEvents();
-        window.scrollTo({ top: 0, behavior: 'instant' });
-    }, [page, applyFilters]);
-    const handleFilterChange = (e) => {
-        setFilters({
-            ...filters,
-            [e.target.name]: e.target.value
-        });
-    };
-    const handleApplyFilters = () => {
-        setPage(1);  
-        setApplyFilters(!applyFilters);  
-    };
-    const handleNextPage = () => {
-        if (page * limit < parseInt(total)) {
-            setPage(page + 1);
+        // Fetch event details
+        const fetchEventDetails = async () => {
+            try {
+                const response = await axios.get(`${config.url}api/event/${eventId}`);
+                setEventDetails(response.data);
+            } catch (error) {
+                console.error('Error fetching event details:', error);
+            }
+        };
+        fetchEventDetails();
+    }, [eventId]);
+
+    const handleSubscribe = async () => {
+        if (eventDetails.subscribers.length < eventDetails.capacity) {
+            try {
+                const userId = 0; /* Acá en vez de decir 0 debería decir el ID del usuario que se tiene que obtener */
+                await axios.post(`${config.url}api/event/${eventId}/subscribe`, { userId });
+                setIsSubscribed(true);
+                setError('');
+            } catch (error) {
+                console.error('Error subscribing to event:', error);
+                setError('No se pudo suscribir al evento.');
+            }
+        } else {
+            setError('No hay plazas disponibles para este evento.');
         }
     };
-    const handlePreviousPage = () => {
-        if (page > 1) {
-            setPage(page - 1);
-        }
-    };
+
     return (
-        <div className="event-list">
-            <h1>Lista de Eventos</h1>      
-            <div className="filters">
-                <FormInput
-                    label="Buscar por nombre"
-                    type="text"
-                    name="name"
-                    value={filters.name}
-                    onChange={handleFilterChange}
-                    placeholder="Buscar por nombre"
-                />
-                <FormInput
-                    label="Categoría"
-                    type="text"
-                    name="category"
-                    value={filters.category}
-                    onChange={handleFilterChange}
-                    placeholder="Categoría"
-                />
-                <FormInput
-                    label="Etiqueta"
-                    type="text"
-                    name="tag"
-                    value={filters.tag}
-                    onChange={handleFilterChange}
-                    placeholder="Etiqueta"
-                />
-                <FormInput
-                    label="Fecha de inicio"
-                    type="date"
-                    name="startDate"
-                    value={filters.startDate}
-                    onChange={handleFilterChange}
-                />
-                <button onClick={handleApplyFilters}>Aplicar Filtros</button>
-            </div>
-            <ul>
-                {events.length > 0 ? (
-                    events.map(event => (
-                        <li key={event.id}>
-                            <h2>{event.name}</h2>
-                            <p>{event.description}</p>
-                            <p>Categoría: {event.event_category.name}</p>
-                            <p>Locacion: {event.event_location.full_address}</p>
-                            <p>Fecha de inicio: {new Date(event.start_date).toLocaleString()}</p>
-                            <p>Tags: {event.tags ? event.tags.map(tag => tag.name).join(', ') : 'N/A'}</p>
-                        </li>
-                    ))
-                ) : (
-                    <p>No hay eventos disponibles</p>
-                )}
-            </ul>
-            <div className="pagination">
-                <button onClick={handlePreviousPage} disabled={page === 1}>
-                    Anterior
-                </button>
-                <span>Página {page}</span>
-                <button onClick={handleNextPage} disabled={page * limit >= total}>
-                    Siguiente
-                </button>
-            </div>
+        <div className="event-detail">
+            {eventDetails ? (
+                <>
+                    <h1>{eventDetails.name}</h1>
+                    <p>{eventDetails.description}</p>
+                    <p>Categoría: {eventDetails.event_category.name}</p>
+                    <p>Locación: {eventDetails.event_location.full_address}</p>
+                    <p>Fecha de inicio: {new Date(eventDetails.start_date).toLocaleString()}</p>
+                    <p>Plazas disponibles: {eventDetails.capacity - eventDetails.subscribers.length}</p>
+                    <button onClick={handleSubscribe} disabled={isSubscribed || eventDetails.subscribers.length >= eventDetails.capacity}>
+                        {isSubscribed ? 'Inscripto' : 'Suscribirse'}
+                    </button>
+                    {error && <p className="error">{error}</p>}
+                </>
+            ) : (
+                <p>Cargando detalles del evento...</p>
+            )}
         </div>
     );
-}
-export default ListadoEventos;
+};
+
+export default DetalleEvento;
