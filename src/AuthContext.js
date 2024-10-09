@@ -7,11 +7,13 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        console.log(token);
-        if (!token) {
-            localStorage.setItem("token", "");
-        } else if (token !== "") {
+
+        if (token && token !== "") {
+            // Aquí podrías agregar una validación extra para verificar si el token es válido
             setIsLoggedIn(true);
+        } else {
+            localStorage.removeItem("token");
+            setIsLoggedIn(false);
         }
     }, []);
 

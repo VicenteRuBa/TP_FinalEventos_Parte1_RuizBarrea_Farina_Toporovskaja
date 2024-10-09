@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import axios from 'axios';
 import config from '../../config';
 import FormInput from '../../components/FormInput'; 
@@ -12,6 +12,26 @@ const CargarEvento = () => {
         category: '',
         capacity: 0,
     });
+    const [userId, setUserId] = useState(null); // Estado para almacenar el userId del usuario logueado
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const response = await axios.get(`${config.url}api/user/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}` // Asegúrate de que el token esté almacenado y disponible
+                    }
+                });
+                setUserId(response.data.id); // Ajusta esto según la estructura de tu respuesta
+            } catch (error) {
+                console.error('Error fetching user ID:', error);
+                setError('No se pudo obtener la información del usuario.');
+            }
+        };
+
+        fetchUserId();
+    }, []);
 
     const handleChange = (e) => {
         setEventData({
@@ -23,7 +43,7 @@ const CargarEvento = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const userId = 0; /* Acá en vez de decir 0 debería decir el id del usuario logueado.*/
+            //const userId=0;
             await axios.post(`${config.url}api/event`, { ...eventData, userId });
             alert('Evento creado con éxito');
         } catch (error) {
@@ -35,6 +55,7 @@ const CargarEvento = () => {
     return (
         <div className="event-form">
             <h1>Cargar Evento</h1>
+            {error && <p className="error">{error}</p>}
             <form onSubmit={handleSubmit}>
                 <FormInput
                     label="Nombre del Evento"

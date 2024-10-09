@@ -16,6 +16,10 @@ const NavBar = () => {
         const fetchUsername = async () => {
             try {
                 const token = localStorage.getItem('token');
+                if (!token || token === '') {
+                    return;
+                }
+
                 const response = await axios.get(`${config.url}api/user/username`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -25,16 +29,18 @@ const NavBar = () => {
                 setHasFetchedUsername(true);
             } catch (error) {
                 console.error('Error fetching username:', error);
+                setIsLoggedIn(false);  // Deslogea si no puede obtener el username
+                localStorage.removeItem('token');  // Elimina el token inválido
             }
         };
 
         if (isLoggedIn && !hasFetchedUsername) {
             fetchUsername();
         }
-    }, [isLoggedIn, hasFetchedUsername]);
+    }, [isLoggedIn, hasFetchedUsername, setIsLoggedIn]);
 
     const handleCloseSession = () => {
-        localStorage.setItem('token', '');
+        localStorage.removeItem('token');
         setIsLoggedIn(false);
         setHasFetchedUsername(false);
         window.location.reload();
@@ -50,7 +56,7 @@ const NavBar = () => {
                 {isLoggedIn ? (
                     <div className="user-info">
                         <img src={userPhoto} alt="User" className="user-photo" />
-                        <span>{username}</span>
+                        <span>{username || 'Usuario'}</span>
                         <button onClick={handleCloseSession} className="logout-button">Cerrar sesión</button>
                     </div>
                 ) : (
