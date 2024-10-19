@@ -1,59 +1,74 @@
-/*aca deben estar los detalles del evento seleccionado en el listado de eventos
-en el listado esta el codigo del detalle evento por lo que esta ahi hay que ponerlo aca y crear un listado de eventos :)
-*/
-
-import React, { useState, useEffect } from 'react';
+/*aca deben estar los detalles del evento seleccionado en el listado de evento*/
+import React, { useState, useEffect, useContext } from 'react';  // Agrega useContext
 import axios from 'axios';
 import config from '../../config';
-import FormInput from '../../components/FormInput'; 
+import { AuthContext } from '../../AuthContext';  // Importa AuthContext
 import "./styles.css";
-const DetalleEvento = ({ event = {} }) => {
+
+const DetalleEvento = ({ match }) => {
+    const { id } = match.params;
     const [eventDetails, setEventDetails] = useState(null);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [error, setError] = useState('');
-    const [userId, setUserId] = useState(null);
+    const { user, token } = useContext(AuthContext);  // Usa AuthContext para obtener el usuario y el token
 
     useEffect(() => {
-        // Fetch event details
-        const fetchEventDetails = async () => {
-            try {
-                const response = await axios.get(`${config.url}api/event`);
-                setEventDetails(response.data);
-                console.log(response)
-            } catch (error) {
-                console.error('Error fetching event details:', error);
+      const fetchEventDetails = async () => {
+        try {
+          const response = await axios.get(`${config.url}api/event/${id}`);
+          setEventDetails(response.data);
+        } catch (error) {
+          console.error('Error fetching event details:', error);
+          setError('No se pudo cargar el evento.');
+        }
+      };
+
+      fetchEventDetails();
+    }, [id]);
+
+    const handleSubscribe = async () => {
+      if (eventDetails.subscribers.length < eventDetails.max_assistance) {  // Verifica la capacidad
+        try {
+          await axios.post(`${config.url}api/event/${id}/subscribe`, 
+            { userId: user.id },  // Usa el ID del usuario autenticado
+            {
+              headers: {
+                Authorization: `Bearer ${token}`  // Añade el token para autenticación
+              }
             }
-            
-        };
-        const fetchUserDetails = async () => {
-            try {
-                const userResponse = await axios.get(`${config.url}api/user/profile`, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`  // Asegúrate de pasar el token JWT si estás utilizando autenticación basada en tokens
-                    }
-                });
-                setUserId(userResponse.data.id);  // Ajusta esto según la estructura de la respuesta
-            } catch (error) {
-                console.error('Error fetching user details:', error);
-                setError('No se pudo obtener la información del usuario.');
-            }
-        };
-
-        fetchEventDetails();
-        fetchUserDetails(); 
-
-    }, []);
-
+          );
+          setIsSubscribed(true);
+          setError('');
+        } catch (error) {
+          console.error('Error subscribing to event:', error);
+          setError('No se pudo suscribir al evento.');
+        }
+      } else {
+        setError('No hay plazas disponibles para este evento.');
+      }
+    };
 
     return (
-        <div>
-            <h1>{event.name || "Sin nombre"}</h1>
-            <p>{event.description || "Sin descripción"}</p>
-            <p>{event.startDate || "Fecha no disponible"}</p>
-            <p>{event.category || "Categoría no disponible"}</p>
-        </div>
+      <div>
+        {eventDetails ? (
+          <>
+            <h1>{eventDetails.name}</h1>
+            <p>{eventDetails.description}</p>
+            <p>Fecha de inicio: {new Date(eventDetails.start_date).toLocaleString()}</p>
+            {/* Mostrar la categoría del evento */}
+            <p>Categoría: {eventDetails.event_category ? eventDetails.event_category.name : "Categoría no disponible"}</p>
+            <p>Plazas disponibles: {eventDetails.max_assistance - eventDetails.subscribers.length}</p>
+            <button onClick={handleSubscribe} disabled={isSubscribed}>
+              {isSubscribed ? 'Inscripto' : 'Suscribirse'}
+            </button>
+            {error && <p>{error}</p>}
+          </>
+        ) : (
+          <p>Cargando detalles del evento...</p>
+        )}
+      </div>
     );
-};
+  };
 
 export default DetalleEvento;
 
