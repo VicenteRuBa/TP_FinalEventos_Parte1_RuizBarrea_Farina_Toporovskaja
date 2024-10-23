@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; 
 import config from '../../config';
-import { useNavigate } from 'react-router-dom';
 import EventoCard from "../../components/EventoCard/eventoCard"
 import Cookies from 'js-cookie';
 
 const ListadoEventos = () => {
-    const [eventos, setEventos] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true); 
-    const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const userId = Cookies.get('userId'); // Obtener el ID del usuario
     

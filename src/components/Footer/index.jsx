@@ -4,11 +4,6 @@ const Footer = () => {
     return (
         <footer className="footer">
         <div className="footer-content">
-            <div className="footer-links">
-                <a href="#">Sobre nosotros</a>
-                <a href="#">Contacto</a>
-                <a href="#">Política de privacidad</a>
-            </div>
             <div className="social-media">
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
                 <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>

@@ -15,7 +15,7 @@ const EventCard = ({ event, userId }) => {
 
   useEffect(() => {
     checkEnrollment();  // Verificar si el usuario ya está inscrito y el número de inscritos
-  }, []);
+  },);
 
   // Verificar si el usuario ya está inscrito y cuántos usuarios están inscritos
   const checkEnrollment = async () => {
@@ -30,12 +30,13 @@ const EventCard = ({ event, userId }) => {
       setIsSubscribed(isEnrolledResponse.data.isEnrolled);
 
       // Obtener el número de inscritos
-      const countResponse = await axios.get(`${config.url}api/event${event.id}/enrollment-count`, {
+      const countResponse = await axios.get(`${config.url}api/event${event.id}/enrollment`, {
         headers: {
           Authorization: `Bearer ${token}`,  // Enviar el token en el encabezado Authorization
         },
       });
-      setEnrolledCount(countResponse.data.count);
+      console.log(countResponse)
+      setEnrolledCount(countResponse.user.count);
     } catch (error) {
       console.error('Error al verificar la inscripción o el número de inscritos:', error);
     }
@@ -103,8 +104,10 @@ const EventCard = ({ event, userId }) => {
         <Link to={`/event/edit/${event.id}`}>
           <button className="modify-button">Modificar Evento</button>
         </Link>
-      ) : (
-        event.enabled_for_enrollment && enrolledCount < event.max_assistance ? (
+      ) : (<p></p>)}
+
+      
+        {event.enabled_for_enrollment && enrolledCount < event.max_assistance ? (
           isSubscribed ? (
             <button onClick={handleUnsubscription} className="unsubscribe-button">
               Desuscribirse
@@ -119,7 +122,7 @@ const EventCard = ({ event, userId }) => {
             {isSubscribed ? 'Ya estás suscrito' : 'No hay plazas disponibles'}
           </button>
         )
-      )}
+        }
 
       {message && <p>{message}</p>}
     </div>
