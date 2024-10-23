@@ -2,62 +2,58 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom'; 
 import config from '../../config';
+import { useNavigate } from 'react-router-dom';
+import EventoCard from "../../components/EventoCard/eventoCard"
+import Cookies from 'js-cookie';
 
 const ListadoEventos = () => {
     const [eventos, setEventos] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true); 
-
+    const navigate = useNavigate();
+    const [events, setEvents] = useState([]);
+    const userId = Cookies.get('userId'); // Obtener el ID del usuario
+    
+    
     useEffect(() => {
-        const fetchEventos = async () => {
-            try {
-                const response = await axios.get(`${config.url}api/event`);
-                
-                console.log('Respuesta de la API:', response); // Depuración: Verifica la respuesta completa
-                console.log('Datos obtenidos:', response.data); // Depuración: Muestra los datos obtenidos
-
-                if (response.data && response.data.length > 0) {
-                    setEventos(response.data);
-                    setError('');
-                } else {
-                    setError('No hay eventos disponibles en este momento.');
-                }
-            } catch (error) {
-                console.error('Error al obtener eventos:', error); // Depuración: Imprime el error
-                setError('No se pudieron cargar los eventos.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchEventos();
+      fetchEvents();  
     }, []);
-
-    if (loading) {
+  
+      const fetchEvents = async () => {
+        try {
+          const response = await axios.get(`${config.url}api/event`);  
+          setEvents(response.data.collection); 
+          setLoading(false);  
+        } catch (error) {
+          console.error('Error al obtener los eventos:', error);
+          setError('Error al cargar los eventos');  
+          setLoading(false);  
+        }
+      };
+    
+      if (loading) {
         return <p>Cargando eventos...</p>;
-    }
+      }
+    
+      if (error) {
+        return <p>{error}</p>;
+      }
+
 
     return (
-        <div>
-            <h1>Listado de Eventos</h1>
-            {error && <p>{error}</p>}
-            <ul>
-                {eventos.length > 0 ? (
-                    eventos.map(event => (
-                        <li key={event.id}>
-                            <Link to={`/event/${event.id}`}>
-                                <h2>{event.name}</h2>
-                                <p>{event.description}</p>
-                                <p>{new Date(event.start_date).toLocaleString()}</p> {/* Ajusta la fecha */}
-                                <p>{event.event_category ? event.event_category.name : "Categoría no disponible"}</p>
-                            </Link>
-                        </li>
-                    ))
-                ) : (
-                    <p>No hay eventos disponibles.</p>
-                )}
-            </ul>
+        <main>
+        <h1 >Eventos Disponibles</h1>
+        <div >
+          {events.length > 0 ? (
+            events.map((event) => (
+              <EventoCard key={event.id} event={event} userId={userId} /> 
+            ))
+          ) : (
+            <p>No hay eventos disponibles en este momento</p>
+          )}
         </div>
+        
+      </main>
     );
 };
 

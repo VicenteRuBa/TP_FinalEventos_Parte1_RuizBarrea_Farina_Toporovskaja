@@ -1,0 +1,96 @@
+/* Contenedor de la tarjeta de evento */
+.event-card {
+    background-color: #cfcfcf; /* Fondo gris oscuro */
+    color: black;            /* Texto gris claro */
+    border: 1px solid #cfcfcf;    /* Borde más claro */
+    border-radius: 12px;       /* Bordes redondeados */
+    padding: 24px;
+    margin: 24px;
+    width: 350px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.6); /* Sombra más suave */
+}
+
+/* Efecto hover para tarjetas */
+.event-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 10px 25px rgba(255, 153, 21, 0.7);
+}
+
+.event-card h3 {
+    font-size: 26px; /* Tamaño de fuente aumentado */
+    margin-bottom: 12px;
+    color: #00bcd4; /* Color azul claro */
+    font-family: 'Arial', sans-serif; /* Cambiado a Arial */
+}
+
+.event-card p {
+    margin: 6px 0;
+    font-size: 20px; /* Tamaño de fuente aumentado */
+    line-height: 1.5; /* Ajuste de interlineado */
+    font-family: 'Verdana', sans-serif; /* Cambiado a Verdana */
+}
+
+/* Estilos para Entradas Disponibles */
+.available {
+    color: #76ff03; /* Verde lima para entradas disponibles */
+    font-weight: bold;
+}
+
+/* Estilos para Entradas Agotadas */
+.sold-out {
+    color: #ff5252; /* Rojo más brillante para entradas agotadas */
+    font-weight: bold;
+}
+
+/* Contenedor para las tarjetas de eventos */
+.events-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .event-card {
+        width: 100%;  /* Ajuste de ancho en pantallas pequeñas */
+    }
+}
+
+/* Botón de suscripción */
+.subscribe-button {
+    background-color: #2196f3; /* Azul para el botón de suscripción */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+}
+
+.subscribe-button-disabled {
+    background-color: #999;
+    color: #666;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: not-allowed;
+    border: none;
+}
+
+.unsubscribe-button {
+    background-color: #ff4081; /* Rosa para el botón de desuscripción */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+}
+
+.modify-button {
+    background-color: #ffc107; /* Amarillo para el botón de modificar */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+}
