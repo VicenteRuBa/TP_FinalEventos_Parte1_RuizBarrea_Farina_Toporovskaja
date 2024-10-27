@@ -18,6 +18,7 @@ const ListadoEventos = () => {
       const fetchEvents = async () => {
         try {
           const response = await axios.get(`${config.url}api/event`);  
+          console.log("Eventos:", response.data);
           setEvents(response.data.collection); 
           setLoading(false);  
         } catch (error) {

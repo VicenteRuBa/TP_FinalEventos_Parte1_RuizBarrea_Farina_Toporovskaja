@@ -16,9 +16,10 @@ const DetalleEvento = ({ match }) => {
       const fetchEventDetails = async () => {
         try {
           const response = await axios.get(`${config.url}api/event/${id}`);
+          console.log("Detalle del Evento:", response.data);
           setEventDetails(response.data);
         } catch (error) {
-          console.error('Error fetching event details:', error);
+          console.error('Error al obtener el detalle del evento:', error);
           setError('No se pudo cargar el evento.');
         }
       };

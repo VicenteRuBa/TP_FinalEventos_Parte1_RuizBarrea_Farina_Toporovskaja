@@ -39,12 +39,11 @@ const NavBar = () => {
         }
     }, [isLoggedIn, hasFetchedUsername, setIsLoggedIn]);
 
-    const handleCloseSession = () => {
-        localStorage.removeItem('token');
+    const handleLogout = () => {
+        localStorage.removeItem("token");
         setIsLoggedIn(false);
-        setHasFetchedUsername(false);
-        window.location.reload();
-    };
+        console.log("Usuario deslogueado");  // Log para verificar la acción de logout
+      };
 
     return (
         <nav className="navbar">
@@ -57,7 +56,7 @@ const NavBar = () => {
                     <div className="user-info">
                         <img src={userPhoto} alt="User" className="user-photo" />
                         <span>{username || 'Usuario'}</span>
-                        <button onClick={handleCloseSession} className="logout-button">Cerrar sesión</button>
+                        <button onClick={handleLogout} className="logout-button">Cerrar sesión</button>
                     </div>
                 ) : (
                     <Link to="/login" className="login-button">Ingresar</Link>
