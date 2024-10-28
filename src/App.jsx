@@ -6,6 +6,8 @@ import ListadoEventos from './views/ListadoEventos/index.jsx';
 import DetalleEvento from './views/DetalleEventos/index.jsx';
 import InicioSesion from './views/InicioSesion/index.jsx';
 import Registro from './views/Registro/index.jsx';
+import EditarEvento from './views/editEvent/index.jsx'; 
+
 import { AuthProvider } from "./AuthContext"; 
 import Footer from './components/Footer/index.jsx';
 
@@ -22,6 +24,8 @@ function App() {
           <Route exact path="/register" element={<Registro />} />
           <Route exact path="/event/" element={<ListadoEventos />} /> 
           <Route exact path="/event/:id" element={<DetalleEvento />} />
+          <Route exact path="/event/edit/:id" element={<EditarEvento />} />
+
         </Routes>   
       </main>
       <footer>

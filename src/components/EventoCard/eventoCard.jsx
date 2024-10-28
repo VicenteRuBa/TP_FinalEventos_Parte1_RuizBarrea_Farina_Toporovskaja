@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import './style.css';
 import config from '../../config';
 
-
 const EventCard = ({ event, userId }) => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [enrolledCount, setEnrolledCount] = useState(0);  // Almacenar cuántos están inscritos
@@ -14,38 +13,37 @@ const EventCard = ({ event, userId }) => {
   const token = Cookies.get('token');  // Obtener el token JWT de las cookies
 
   useEffect(() => {
-    checkEnrollment();  // Verificar si el usuario ya está inscrito y el número de inscritos
-  },);
+    checkEnrollment();  // Obtener el número de inscritos
+  }, []);
 
-  // Verificar si el usuario ya está inscrito y cuántos usuarios están inscritos
   const checkEnrollment = async () => {
     try {
-      // Verificar si el usuario ya está inscrito
-      const isEnrolledResponse = await axios.get(`${config.url}api/event${event.id}/is-enrolled`, {
-        params: { userId },
-        headers: {
-          Authorization: `Bearer ${token}`,  // Enviar el token en el encabezado Authorization
-        },
-      });
-      setIsSubscribed(isEnrolledResponse.data.isEnrolled);
-
       // Obtener el número de inscritos
-      const countResponse = await axios.get(`${config.url}api/event${event.id}/enrollment`, {
+      const countResponse = await axios.get(`${config.url}api/event/${event.id}/enrollment`, {
         headers: {
           Authorization: `Bearer ${token}`,  // Enviar el token en el encabezado Authorization
         },
       });
-      console.log(countResponse)
-      setEnrolledCount(countResponse.user.count);
+
+      // Asegurarse de que la respuesta contiene el dato esperado
+      const enrolledCount = countResponse.data ? countResponse.data.total : 0;
+      setEnrolledCount(enrolledCount);
+
+      // Verificar si existe la lista de participantes antes de aplicar el método .some()
+      const isUserEnrolled = countResponse.data && countResponse.data.rows
+        ? countResponse.data.rows.some((participant) => participant.user.id === userId)
+        : false;
+      setIsSubscribed(isUserEnrolled);
+      
     } catch (error) {
-      console.error('Error al verificar la inscripción o el número de inscritos:', error);
+      console.error('Error al verificar el número de inscritos:', error);
     }
   };
 
   // Función para suscribirse al evento
   const handleSubscription = async () => {
     try {
-      await axios.post(`${config.url}api/event${event.id}/enrollment`, 
+      await axios.post(`${config.url}api/event/${event.id}/enrollment`, 
       { userId }, 
       {
         headers: {
@@ -64,12 +62,12 @@ const EventCard = ({ event, userId }) => {
   // Función para desuscribirse del evento
   const handleUnsubscription = async () => {
     try {
-      await axios.delete(`${config.url}api/event${event.id}/enrollment`, {
+      await axios.delete(`${config.url}api/event/${event.id}/enrollment`, {
         headers: {
-          Authorization: `Bearer ${token}`,  // Enviar el token en el encabezado Authorization
+          Authorization: `Bearer ${token}`, 
         },
         params: {
-          userId,  // Enviar userId como parámetro de consulta
+          userId, 
         },
       });
       setIsSubscribed(false);
@@ -107,22 +105,21 @@ const EventCard = ({ event, userId }) => {
       ) : (<p></p>)}
 
       
-        {event.enabled_for_enrollment && enrolledCount < event.max_assistance ? (
-          isSubscribed ? (
-            <button onClick={handleUnsubscription} className="unsubscribe-button">
-              Desuscribirse
-            </button>
-          ) : (
-            <button onClick={handleSubscription} className="subscribe-button">
-              Suscribirse
-            </button>
-          )
+      {event.enabled_for_enrollment && enrolledCount < event.max_assistance ? (
+        isSubscribed ? (
+          <button onClick={handleUnsubscription} className="unsubscribe-button">
+            Desuscribirse
+          </button>
         ) : (
-          <button disabled className="subscribe-button-disabled">
-            {isSubscribed ? 'Ya estás suscrito' : 'No hay plazas disponibles'}
+          <button onClick={handleSubscription} className="subscribe-button">
+            Suscribirse
           </button>
         )
-        }
+      ) : (
+        <button disabled className="subscribe-button-disabled">
+          {isSubscribed ? 'Ya estás suscrito' : 'No hay plazas disponibles'}
+        </button>
+      )}
 
       {message && <p>{message}</p>}
     </div>
