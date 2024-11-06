@@ -33,7 +33,7 @@ function CreateEvent() {
   // Obtener categorías de la API
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:7777/api/event-category?limit=100&offset=0', {
+      const response = await axios.get(`${config.url}api/event-category?limit=100&offset=0`, {
         headers: {
           Authorization: `Bearer ${token}`,  // Autenticación con token
         },
@@ -47,7 +47,7 @@ function CreateEvent() {
   // Obtener locaciones de la API
   const fetchLocations = async () => {
     try {
-      const response = await axios.get('http://localhost:7777/api/event-location?limit=100&offset=0', {
+      const response = await axios.get(`${config.url}api/event-location?limit=100&offset=0`, {
         headers: {
           Authorization: `Bearer ${token}`,  // Autenticación con token
         },
@@ -62,7 +62,7 @@ function CreateEvent() {
     e.preventDefault();
 
     try {
-      await axios.post('http://localhost:7777/api/event', {
+      await axios.post(`${config.url}api/event`, {
         name,
         description,
         start_date: startDate,
