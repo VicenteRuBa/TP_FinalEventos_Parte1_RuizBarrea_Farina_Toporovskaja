@@ -1,122 +1,78 @@
-/*aca deben estar los detalles del evento seleccionado en el listado de evento*/
-import React, { useState, useEffect, useContext } from 'react';  // Agrega useContext
+import { useEffect, useState, useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import config from '../../config';
-import { AuthContext } from '../../AuthContext';  // Importa AuthContext
-import "./styles.css";
+import { AuthContext } from "../../AuthContext";
+import './styles.css';
 
-const DetalleEvento = ({ match }) => {
-    const { id } = match.params;
-    const [eventDetails, setEventDetails] = useState(null);
-    const [isSubscribed, setIsSubscribed] = useState(false);
-    const [error, setError] = useState('');
-    const { user, token } = useContext(AuthContext);  // Usa AuthContext para obtener el usuario y el token
+const DetalleEvento = () => {
+    const { id } = useParams();
+    const [eventData, setEventData] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
+    const { isLoggedIn, ifIsLoggedIn } = useContext(AuthContext);
 
     useEffect(() => {
-      const fetchEventDetails = async () => {
-        try {
-          const response = await axios.get(`${config.url}api/event/${id}`);
-          console.log("Detalle del Evento:", response.data);
-          setEventDetails(response.data);
-        } catch (error) {
-          console.error('Error al obtener el detalle del evento:', error);
-          setError('No se pudo cargar el evento.');
-        }
-      };
-
-      fetchEventDetails();
-    }, [id]);
-
-    const handleSubscribe = async () => {
-      if (eventDetails.subscribers.length < eventDetails.max_assistance) {  // Verifica la capacidad
-        try {
-          await axios.post(`${config.url}api/event/${id}/subscribe`, 
-            { userId: user.id },  // Usa el ID del usuario autenticado
-            {
-              headers: {
-                Authorization: `Bearer ${token}`  // Añade el token para autenticación
-              }
-            }
-          );
-          setIsSubscribed(true);
-          setError('');
-        } catch (error) {
-          console.error('Error subscribing to event:', error);
-          setError('No se pudo suscribir al evento.');
-        }
-      } else {
-        setError('No hay plazas disponibles para este evento.');
-      }
-    };
-
-    return (
-      <div>
-        {eventDetails ? (
-          <>
-            <h1>{eventDetails.name}</h1>
-            <p>{eventDetails.description}</p>
-            <p>Fecha de inicio: {new Date(eventDetails.start_date).toLocaleString()}</p>
-            {/* Mostrar la categoría del evento */}
-            <p>Categoría: {eventDetails.event_category ? eventDetails.event_category.name : "Categoría no disponible"}</p>
-            <p>Plazas disponibles: {eventDetails.max_assistance - eventDetails.subscribers.length}</p>
-            <button onClick={handleSubscribe} disabled={isSubscribed}>
-              {isSubscribed ? 'Inscripto' : 'Suscribirse'}
-            </button>
-            {error && <p>{error}</p>}
-          </>
-        ) : (
-          <p>Cargando detalles del evento...</p>
-        )}
-      </div>
-    );
-  };
-
-export default DetalleEvento;
-
-/*const DetalleEvento = ({ eventId }) => {
-
-
- 
-
-    const handleSubscribe = async () => {
-        if (eventDetails.subscribers.length < eventDetails.capacity) {
+        const fetchEventDetail = async () => {
+            const token = localStorage.getItem('token');
             try {
-                //const userId=0;
-                await axios.post(`${config.url}api/event/${eventId}/subscribe`, { userId });
-                setIsSubscribed(true);
-                setError('');
+                const response = await axios.get(`${config.url}api/event/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                console.log(response.data[0]);
+                setEventData(response.data[0]);
             } catch (error) {
-                console.error('Error subscribing to event:', error);
-                setError('No se pudo suscribir al evento.');
+                console.error('Error fetching event details:', error);
+                setErrorMessage('Error fetching event details. Please try again.');
             }
-        } else if (!userId) {
-            setError('No se pudo obtener el ID del usuario.');
-        } else {
-            setError('No hay plazas disponibles para este evento.');
+        };
+
+        fetchEventDetail();
+    }, [id, isLoggedIn]);
+
+    const handleSuscribeToEvent = async (e) => {
+        e.preventDefault();
+        if (!ifIsLoggedIn()) {
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        try {
+            const response = await axios.post(`${config.url}api/event/${id}/enrollment`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.status === 200) {
+                setErrorMessage('');
+            }
+        } catch (error) {
+            console.error('Error enrolling to event:', error);
+            setErrorMessage(error.response?.data || 'Error enrolling to event. Please try again.');
         }
     };
 
     return (
-        <div className="event-detail">
-            {eventDetails ? (
+        <div className="event-detail-container">
+            {eventData ? (
                 <>
-                    <h1>{eventDetails.name}</h1>
-                    <p>{eventDetails.description}</p>
-                    <p>Categoría: {eventDetails.event_category.name}</p>
-                    <p>Locación: {eventDetails.event_location.full_address}</p>
-                    <p>Fecha de inicio: {new Date(eventDetails.start_date).toLocaleString()}</p>
-                    <p>Plazas disponibles: {eventDetails.capacity - eventDetails.subscribers.length}</p>
-                    <button onClick={handleSubscribe} disabled={isSubscribed || eventDetails.subscribers.length >= eventDetails.capacity}>
-                        {isSubscribed ? 'Inscripto' : 'Suscribirse'}
-                    </button>
-                    {error && <p className="error">{error}</p>}
+                    <h1 className="event-title">{eventData.name}</h1>
+                    <p className="event-description">{eventData.description}</p>
+                    <div className="event-info">
+                        <p><strong>Fecha de Inicio:</strong> {new Date(eventData.start_date).toLocaleDateString()}</p>
+                        <p><strong>Duración:</strong> {eventData.duration_in_minutes} minutos</p>
+                        <p><strong>Precio:</strong> ${eventData.price}</p>
+                        <p><strong>Creador:</strong> {eventData.creator_user.first_name} {eventData.creator_user.last_name}</p>
+                    </div>
+                    <button className="subscribe-button" onClick={handleSuscribeToEvent}>Suscribirme</button>
                 </>
             ) : (
                 <p>Cargando detalles del evento...</p>
             )}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
         </div>
     );
 };
 
 export default DetalleEvento;
-*/
