@@ -17,25 +17,26 @@ const ListadoEventos = () => {
         name: '',
         category: ''
     });
-    const [applyFilters, setApplyFilters] = useState(false);  
+    const [applyFilters, setApplyFilters] = useState(false);
     const { ifIsLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
         localStorage.setItem("navigationHistory", false);
-    }, [])
+    }, []);
 
+    // Función para obtener los eventos
     const fetchEvents = async () => {
         const { name = '', tag = '', category = '' } = filters;
         let queryParams = [];
 
-        if (name.trim()) queryParams.push(`name=${name}`);
-        if (tag.trim()) queryParams.push(`tag=${tag}`);
+        if (name.trim()) queryParams.push(`name=${encodeURIComponent(name)}`);
+        if (tag.trim()) queryParams.push(`tag=${encodeURIComponent(tag)}`);
         if (filters.startDate.trim()) {
             const formattedDate = new Date(filters.startDate).toISOString().split('T')[0];
             queryParams.push(`startdate=${formattedDate}`);
         }
-        if (category.trim()) queryParams.push(`category=${category}`);
+        if (category.trim()) queryParams.push(`category=${encodeURIComponent(category)}`);
         queryParams.push(`page=${page}`);
         queryParams.push(`limit=${limit}`);
 
@@ -44,6 +45,7 @@ const ListadoEventos = () => {
 
         try {
             const response = await axios.get(`${config.url}api/event${queryString}`);
+            console.log("Response Data:", response.data); // Verifica la respuesta de la API
             const eventsData = response?.data?.collection || [];
             setEvents(eventsData);
 
@@ -56,11 +58,13 @@ const ListadoEventos = () => {
         }
     };
 
+    // Escucha cambios en `page` o `applyFilters` para llamar `fetchEvents`
     useEffect(() => {
         fetchEvents();
         window.scrollTo({ top: 0, behavior: 'instant' });
     }, [page, applyFilters]);
 
+    // Maneja cambios en los filtros
     const handleFilterChange = (e) => {
         setFilters({
             ...filters,
@@ -68,11 +72,13 @@ const ListadoEventos = () => {
         });
     };
 
+    // Aplica filtros y reinicia la página
     const handleApplyFilters = () => {
         setPage(1);  
-        setApplyFilters(!applyFilters);
+        setApplyFilters(!applyFilters); // Cambia applyFilters para forzar la recarga
     };
 
+    // Navegación de página
     const handleNextPage = () => {
         if (page * limit < parseInt(total)) {
             setPage(page + 1);
@@ -85,6 +91,7 @@ const ListadoEventos = () => {
         }
     };
 
+    // Crear evento
     const handleCreateEventClick = (e) => {
         e.preventDefault();
         if(!ifIsLoggedIn()){
@@ -95,7 +102,10 @@ const ListadoEventos = () => {
 
     return (
         <div className="event-list">
-            <div><h1>Listado de Eventos</h1><button className="create-button" onClick={handleCreateEventClick}>Crear</button></div>
+            <div>
+                <h1>Listado de Eventos</h1>
+                <button className="create-button" onClick={handleCreateEventClick}>Crear</button>
+            </div>
             
             <div className="filters">
                 <FormInput
@@ -135,8 +145,8 @@ const ListadoEventos = () => {
             <ul>
                 {events.length > 0 ? (
                     events.map(event => (
-                        <div>
-                            <li key={event.id}>
+                        <div key={event.id}>
+                            <li>
                                 <div>
                                     <h2>{event.name}</h2>
                                     <p>{event.description}</p>
@@ -167,6 +177,6 @@ const ListadoEventos = () => {
             </div>
         </div>
     );
-}
+};
 
 export default ListadoEventos;

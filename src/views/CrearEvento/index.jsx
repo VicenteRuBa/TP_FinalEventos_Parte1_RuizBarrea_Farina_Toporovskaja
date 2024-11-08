@@ -22,6 +22,7 @@ const FormularioEvento = () => {
     const { isLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
 
+    // Maneja cambios en el formulario
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setEventData({
@@ -37,54 +38,75 @@ const FormularioEvento = () => {
         }
     }, [isLoggedIn, navigate]);
 
+    // Maneja la solicitud para crear el evento
     const handleSubmit = async (e) => {
-      e.preventDefault();
-      setError('');
-      setSuccess('');
-  
-      const token = localStorage.getItem('token');
-      
-      
-      const formattedStartDate = new Date(eventData.start_date).toISOString().slice(0, 19);
-      
-      const formattedEventData = {
-          ...eventData,
-          start_date: formattedStartDate,
-      };
-  
-      try {
-          const response = await axios.post(`${config.url}api/event`, formattedEventData, {
-              headers: {
-                  Authorization: `Bearer ${token}`,
-              },
-          });
-          setSuccess('Evento creado con éxito!');
-          console.log('Respuesta del servidor:', response.data);
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+
+        const token = localStorage.getItem('token');
+        console.log(localStorage.getItem('token'));
+        if (!token) {
+            setError('No se encontró el token de autenticación. Inicia sesión nuevamente.');
+            return;
+        }
+
+        // Formato de la fecha para envío
+        const formattedStartDate = new Date(eventData.start_date).toISOString();
         
-          setEventData({
-              name: '',
-              description: '',
-              id_event_category: '',
-              id_event_location: '',
-              start_date: '',
-              duration_in_minutes: '',
-              price: '',
-              enabled_for_enrollment: false,
-              max_assistance: '',
-          });
-      } catch (error) {
-          console.error('Error al crear el evento:', error);
-         
-          if (error.response && error.response.data) {
-              
-              setError(error.response.data.message || error.response.data.detail || 'Ocurrió un error. Intenta nuevamente.');
-          } else {
-              setError('Ocurrió un error al crear el evento. Intenta nuevamente.');
-          }
-      }
-  };
-  
-  {error && <div className="alert alert-danger">{error}</div>}
+        const formattedEventData = {
+            name: eventData.name,
+            description: eventData.description,
+        id_event_category: parseInt(eventData.id_event_category) || 1, // usa 1 o el ID correcto si es numérico
+        id_event_location: parseInt(eventData.id_event_location) || 2, // usa 2 o el ID correcto si es numérico
+        start_date: formattedStartDate,
+        duration_in_minutes: parseInt(eventData.duration_in_minutes),
+        price: parseFloat(eventData.price),
+        enabled_for_enrollment: eventData.enabled_for_enrollment,
+        max_assistance: parseInt(eventData.max_assistance)
+        };
+
+        try {
+            const response = await axios.post(`${config.url}api/event`, formattedEventData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setSuccess('¡Evento creado con éxito!');
+            console.log('Respuesta del servidor:', response.data);
+        
+            // Resetea el formulario
+            setEventData({
+                name: '',
+                description: '',
+                id_event_category: '',
+                id_event_location: '',
+                start_date: '',
+                duration_in_minutes: '',
+                price: '',
+                enabled_for_enrollment: false,
+                max_assistance: '',
+            });
+        } catch (error) {
+            console.log('Error status:', error.response.status);
+            console.error('Error al crear el evento:', error);
+
+            // Desglose detallado de errores
+            if (error.response) {
+                if (error.response.status === 401) {
+                    setError('No tienes autorización para crear el evento. Revisa tus credenciales.');
+                } else if (error.response.status === 400) {
+                    setError('Datos inválidos. Por favor, revisa el formulario y asegúrate de que todos los campos estén llenos correctamente.');
+                } else if (error.response.status === 500) {
+                    setError('Error en el servidor. Intenta nuevamente más tarde.');
+                } else {
+                    setError(error.response.data.message || error.response.data.detail || 'Ocurrió un error desconocido en el servidor.');
+                }
+            } else {
+                setError('No se pudo conectar al servidor. Verifica tu conexión o la configuración del servidor.');
+            }
+        }
+    };
 
     return (
         <div className="container">
@@ -92,7 +114,8 @@ const FormularioEvento = () => {
             <form onSubmit={handleSubmit}>
                 {error && <div className="alert alert-danger">{error}</div>}
                 {success && <div className="alert alert-success">{success}</div>}
-        
+                
+                {/* Todos los campos del formulario */}
                 <FormInput
                     label="Nombre del Evento"
                     type="text"
@@ -179,6 +202,6 @@ const FormularioEvento = () => {
             </form>
         </div>
     );
-}
+};
 
 export default FormularioEvento;

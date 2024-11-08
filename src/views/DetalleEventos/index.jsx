@@ -9,6 +9,7 @@ const DetalleEvento = () => {
     const { id } = useParams();
     const [eventData, setEventData] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
+    const [isSubscribed, setIsSubscribed] = useState(false); // Estado para manejar la suscripción
     const { isLoggedIn, ifIsLoggedIn } = useContext(AuthContext);
 
     useEffect(() => {
@@ -22,6 +23,11 @@ const DetalleEvento = () => {
                 });
                 console.log(response.data[0]);
                 setEventData(response.data[0]);
+                
+                // Verificar si el usuario está suscrito al evento
+                const userId = JSON.parse(localStorage.getItem('user'))?.id;
+                const isUserSubscribed = response.data[0].enrolled_users.some(user => user.id === userId);
+                setIsSubscribed(isUserSubscribed); // Establecer si el usuario está suscrito
             } catch (error) {
                 console.error('Error fetching event details:', error);
                 setErrorMessage('Error fetching event details. Please try again.');
@@ -31,25 +37,34 @@ const DetalleEvento = () => {
         fetchEventDetail();
     }, [id, isLoggedIn]);
 
-    const handleSuscribeToEvent = async (e) => {
+    const handleSubscriptionToggle = async (e) => {
         e.preventDefault();
         if (!ifIsLoggedIn()) {
             return;
         }
 
         const token = localStorage.getItem('token');
+        const endpoint = isSubscribed ? 'unsubscription' : 'enrollment'; // Cambiar según el estado de suscripción
+
         try {
-            const response = await axios.post(`${config.url}api/event/${id}/enrollment`, {}, {
+            const response = await axios.post(`${config.url}api/event/${id}/${endpoint}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
+
             if (response.status === 200) {
-                setErrorMessage('');
+                setIsSubscribed(!isSubscribed); // Alternar el estado de suscripción
+                setErrorMessage(''); // Limpiar mensaje de error si la acción fue exitosa
             }
         } catch (error) {
-            console.error('Error enrolling to event:', error);
-            setErrorMessage(error.response?.data || 'Error enrolling to event. Please try again.');
+            if (error.response?.data === "El usuario ya se encuentra registrado en el evento") {
+                setIsSubscribed(true); // Si ya está inscrito, cambiar el estado a "suscrito"
+                setErrorMessage("Ya estás inscrito en este evento.");
+            } else {
+                console.error('Error toggling subscription:', error);
+                setErrorMessage(error.response?.data || 'Error toggling subscription. Please try again.');
+            }
         }
     };
 
@@ -65,7 +80,9 @@ const DetalleEvento = () => {
                         <p><strong>Precio:</strong> ${eventData.price}</p>
                         <p><strong>Creador:</strong> {eventData.creator_user.first_name} {eventData.creator_user.last_name}</p>
                     </div>
-                    <button className="subscribe-button" onClick={handleSuscribeToEvent}>Suscribirme</button>
+                    <button className="subscribe-button" onClick={handleSubscriptionToggle}>
+                        {isSubscribed ? 'Desuscribirme' : 'Suscribirme'}
+                    </button>
                 </>
             ) : (
                 <p>Cargando detalles del evento...</p>
