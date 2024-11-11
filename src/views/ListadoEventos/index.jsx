@@ -9,7 +9,7 @@ import { AuthContext } from "../../AuthContext";
 const ListadoEventos = () => {
     const [events, setEvents] = useState([]);
     const [page, setPage] = useState(1);
-    const [limit] = useState(10);
+    const [limit] = useState(2);
     const [total, setTotal] = useState(0);
     const [filters, setFilters] = useState({
         tag: '',
