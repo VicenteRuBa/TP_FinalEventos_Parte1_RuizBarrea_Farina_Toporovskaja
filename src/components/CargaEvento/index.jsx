@@ -6,6 +6,7 @@ import { styles } from './style.jsx';
 import Header from '../../components/header/header.jsx';
 import Input from '../../components/Input/input.jsx';
 import Dropdown from '../../components/Dropdown/dropdown.jsx';
+import config from '../../config.js'
 
 function CreateEvent() {
   const [name, setName] = useState('');

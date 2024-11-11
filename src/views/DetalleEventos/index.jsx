@@ -30,7 +30,6 @@ const DetalleEvento = () => {
                 setIsSubscribed(isUserSubscribed); // Establecer si el usuario está suscrito
             } catch (error) {
                 console.error('Error fetching event details:', error);
-                setErrorMessage('Error fetching event details. Please try again.');
             }
         };
 

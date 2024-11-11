@@ -104,7 +104,8 @@ const ListadoEventos = () => {
         <div className="event-list">
             <div>
                 <h1>Listado de Eventos</h1>
-                <button className="create-button" onClick={handleCreateEventClick}>Crear</button>
+                <button onClick={handleCreateEventClick}>Crear</button>
+                
             </div>
             
             <div className="filters">

@@ -1,91 +1,149 @@
-.event-list {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+/* styles.css */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+}
+
+
+.event-detail-container {
+  max-width: 700px;
+  width: 100%;
+  margin: 20px auto;
+  padding: 2rem;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 1s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.event-detail-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, #b59434, rgb(252, 166, 37));
+  opacity: 0.1;
+  transform: rotate(45deg);
+  z-index: 0;
+}
+
+.event-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2a3f54;
+  margin-bottom: 1rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.event-description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  color: #555;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.event-info {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.event-info p {
+  font-size: 1rem;
+  color: #666;
+  position: relative;
+  z-index: 1;
+}
+
+.event-info strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.subscribe-button {
+  display: inline-block;
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #b59434, #b59434);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.subscribe-button:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, #b59434, #b59434);
+}
+
+.subscribe-button:active {
+  transform: translateY(0);
+  background: linear-gradient(135deg, #b59434, #b59434);
+}
+
+.error-message {
+  font-size: 0.9rem;
+  color: #d9534f;
+  text-align: center;
+  margin-top: 1rem;
+  background: #fbe8e8;
+  padding: 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
   }
-  
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 2rem;
-    color: #333;
+  to {
+      opacity: 1;
+      transform: translateY(0);
   }
-  
-  .filters {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+}
+
+/* Media Query for Responsiveness */
+@media (max-width: 768px) {
+  .event-title {
+      font-size: 2rem;
   }
-  
-  .filters input {
-    flex: 1 1 200px;
-    padding: 10px;
-    margin: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+
+  .event-description {
+      font-size: 1rem;
   }
-  
-  .filters button {
-    padding: 10px 20px;
-    background-color: #b59434;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: auto;
+
+  .event-info p {
+      font-size: 0.95rem;
   }
-  
-  .filters button:hover {
-    background-color: #e0b942 ;
+
+  .subscribe-button {
+      font-size: 1rem;
   }
-  
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  li {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    padding: 15px;
-    background-color: #f9f9f9;
-  }
-  
-  li h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: #333;
-  }
-  
-  li p {
-    margin: 5px 0;
-    color: #555;
-  }
-  
-  .pagination {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-  }
-  
-  .pagination button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .pagination button:disabled {
-    background-color: #ccc;
-  }
-  
-  .pagination span {
-    font-size: 1rem;
-    color: #333;
-  }
-  
+}
