@@ -11,7 +11,8 @@ const FormularioEvento = () => {
         description: '',
         id_event_category: '',
         id_event_location: '',
-        start_date: '',
+        date: '',
+        time: '',
         duration_in_minutes: '',
         price: '',
         enabled_for_enrollment: false,
@@ -45,26 +46,31 @@ const FormularioEvento = () => {
         setSuccess('');
 
         const token = localStorage.getItem('token');
-        console.log(localStorage.getItem('token'));
         if (!token) {
             setError('No se encontró el token de autenticación. Inicia sesión nuevamente.');
             return;
         }
 
-        // Formato de la fecha para envío
-        const formattedStartDate = new Date(eventData.start_date).toISOString();
+        let formattedStartDate = `${eventData.date}T${eventData.time}`;
+
         
+        formattedStartDate = formattedStartDate +":00"
+        console.log(formattedStartDate); 
+
+
         const formattedEventData = {
             name: eventData.name,
             description: eventData.description,
-        id_event_category: parseInt(eventData.id_event_category) || 1, // usa 1 o el ID correcto si es numérico
-        id_event_location: parseInt(eventData.id_event_location) || 2, // usa 2 o el ID correcto si es numérico
-        start_date: formattedStartDate,
-        duration_in_minutes: parseInt(eventData.duration_in_minutes),
-        price: parseFloat(eventData.price),
-        enabled_for_enrollment: eventData.enabled_for_enrollment,
-        max_assistance: parseInt(eventData.max_assistance)
+            id_event_category: parseInt(eventData.id_event_category) || 1,
+            id_event_location: parseInt(eventData.id_event_location) || 2,
+            start_date: formattedStartDate,
+            duration_in_minutes: parseInt(eventData.duration_in_minutes),
+            price: parseFloat(eventData.price),
+            enabled_for_enrollment: eventData.enabled_for_enrollment,
+            max_assistance: parseInt(eventData.max_assistance)
         };
+
+        console.log(formattedEventData);
 
         try {
             const response = await axios.post(`${config.url}api/event`, formattedEventData, {
@@ -72,8 +78,8 @@ const FormularioEvento = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
+            console.log(response);
             setSuccess('¡Evento creado con éxito!');
-            console.log('Respuesta del servidor:', response.data);
         
             // Resetea el formulario
             setEventData({
@@ -81,17 +87,15 @@ const FormularioEvento = () => {
                 description: '',
                 id_event_category: '',
                 id_event_location: '',
-                start_date: '',
+                date: '',
+                time: '',
                 duration_in_minutes: '',
                 price: '',
                 enabled_for_enrollment: false,
                 max_assistance: '',
             });
+            console.log(eventData);
         } catch (error) {
-            console.log('Error status:', error.response.status);
-            console.error('Error al crear el evento:', error);
-
-            // Desglose detallado de errores
             if (error.response) {
                 if (error.response.status === 401) {
                     setError('No tienes autorización para crear el evento. Revisa tus credenciales.');
@@ -153,10 +157,18 @@ const FormularioEvento = () => {
                     className="form-control"
                 />
                 <FormInput
-                    label="Fecha de Inicio"
+                    label="Fecha"
                     type="date"
-                    name="start_date"
-                    value={eventData.start_date}
+                    name="date"
+                    value={eventData.date}
+                    onChange={handleChange}
+                    className="form-control"
+                />
+                <FormInput
+                    label="Hora"
+                    type="time"
+                    name="time"
+                    value={eventData.time}
                     onChange={handleChange}
                     className="form-control"
                 />
