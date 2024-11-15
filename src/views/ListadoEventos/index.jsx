@@ -6,6 +6,7 @@ import "./styles.css";
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext";
 
+// Listado de Eventos
 const ListadoEventos = () => {
     const [events, setEvents] = useState([]);
     const [page, setPage] = useState(1);
@@ -45,7 +46,6 @@ const ListadoEventos = () => {
 
         try {
             const response = await axios.get(`${config.url}api/event${queryString}`);
-            console.log("Response Data:", response.data); // Verifica la respuesta de la API
             const eventsData = response?.data?.collection || [];
             setEvents(eventsData);
 
@@ -58,13 +58,11 @@ const ListadoEventos = () => {
         }
     };
 
-    // Escucha cambios en `page` o `applyFilters` para llamar `fetchEvents`
     useEffect(() => {
         fetchEvents();
         window.scrollTo({ top: 0, behavior: 'instant' });
     }, [page, applyFilters]);
 
-    // Maneja cambios en los filtros
     const handleFilterChange = (e) => {
         setFilters({
             ...filters,
@@ -72,13 +70,11 @@ const ListadoEventos = () => {
         });
     };
 
-    // Aplica filtros y reinicia la página
     const handleApplyFilters = () => {
         setPage(1);  
-        setApplyFilters(!applyFilters); // Cambia applyFilters para forzar la recarga
+        setApplyFilters(!applyFilters); 
     };
 
-    // Navegación de página
     const handleNextPage = () => {
         if (page * limit < parseInt(total)) {
             setPage(page + 1);
@@ -91,13 +87,32 @@ const ListadoEventos = () => {
         }
     };
 
-    // Crear evento
     const handleCreateEventClick = (e) => {
         e.preventDefault();
-        if(!ifIsLoggedIn()){
+        if (!ifIsLoggedIn()) {
             return null;
         }
         navigate('/crearEvento');
+    };
+
+    // Función para filtrar los eventos basados en los filtros aplicados
+    const filterEvents = (event) => {
+        const { name, tag, category } = filters;
+
+        // Normaliza el texto (minúsculas) para la comparación insensible a mayúsculas
+        const lowerName = event.name ? event.name.toLowerCase() : '';
+        const lowerDescription = event.description ? event.description.toLowerCase() : '';
+        const lowerCategory = event.event_category?.name ? event.event_category.name.toLowerCase() : '';
+        const lowerLocation = event.event_location?.full_address ? event.event_location.full_address.toLowerCase() : '';
+        const lowerTags = event.tags ? event.tags.map(t => t.name.toLowerCase()).join(' ') : '';
+
+        // Verifica si los filtros coinciden con las propiedades del evento (sin importar mayúsculas/minúsculas)
+        const matchesName = name ? lowerName.includes(name.toLowerCase()) : true;
+        const matchesCategory = category ? lowerCategory.includes(category.toLowerCase()) : true;
+        const matchesTag = tag ? lowerTags.includes(tag.toLowerCase()) : true;
+
+        // Asegura que si al menos uno de los filtros tiene texto, el filtro se aplique correctamente.
+        return matchesName && matchesCategory && matchesTag;
     };
 
     return (
@@ -105,9 +120,8 @@ const ListadoEventos = () => {
             <div>
                 <h1>Listado de Eventos</h1>
                 <button onClick={handleCreateEventClick}>Crear</button>
-                
             </div>
-            
+
             <div className="filters">
                 <FormInput
                     label="Buscar por nombre"
@@ -126,12 +140,12 @@ const ListadoEventos = () => {
                     placeholder="Categoría"
                 />
                 <FormInput
-                    label="Etiqueta"
+                    label="Tags"
                     type="text"
                     name="tag"
                     value={filters.tag}
                     onChange={handleFilterChange}
-                    placeholder="Etiqueta"
+                    placeholder="Tags"
                 />
                 <FormInput
                     label="Fecha de inicio"
@@ -145,7 +159,7 @@ const ListadoEventos = () => {
 
             <ul>
                 {events.length > 0 ? (
-                    events.map(event => (
+                    events.filter(filterEvents).map(event => (
                         <div key={event.id}>
                             <li>
                                 <div>
@@ -168,13 +182,9 @@ const ListadoEventos = () => {
             </ul>
 
             <div className="pagination">
-                <button onClick={handlePreviousPage} disabled={page === 1}>
-                    Anterior
-                </button>
+                <button onClick={handlePreviousPage} disabled={page === 1}>Anterior</button>
                 <span>Página {page}</span>
-                <button onClick={handleNextPage} disabled={page * limit >= total}>
-                    Siguiente
-                </button>
+                <button onClick={handleNextPage} disabled={page * limit >= total}>Siguiente</button>
             </div>
         </div>
     );
