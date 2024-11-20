@@ -1,16 +1,17 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import FormInput from "../../components/FormInput"; 
-import config from '../../config';
+import FormInput from "../../components/FormInput";
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext";
+import config from '../../config';
+import Dropdown from '../../components/Dropdown/dropdown';
 
 const FormularioEvento = () => {
     const [eventData, setEventData] = useState({
         name: '',
         description: '',
-        id_event_category: '',
-        id_event_location: '',
+        id_event_category: '', // Añadir el estado para la categoría
+        id_event_location: '', // Añadir el estado para la ubicación
         date: '',
         time: '',
         duration_in_minutes: '',
@@ -18,12 +19,44 @@ const FormularioEvento = () => {
         enabled_for_enrollment: false,
         max_assistance: '',
     });
+    const [categories, setCategories] = useState([]);
+    const [locations, setLocations] = useState([]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const { isLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // Maneja cambios en el formulario
+    // Obtener categorías y locaciones
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate(-1);
+        } else {
+            fetchCategories();
+            fetchLocations();
+        }
+    }, [isLoggedIn, navigate]);
+
+    // Obtener categorías desde la API
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get(`${config.url}api/event-category?limit=100&offset=0`);
+            setCategories(response.data.collection);
+        } catch (error) {
+            console.error('Error al obtener las categorías:', error);
+        }
+    };
+
+    // Obtener locaciones desde la API
+    const fetchLocations = async () => {
+        try {
+            const response = await axios.get(`${config.url}api/event-location?limit=100&offset=0`);
+            setLocations(response.data.collection);
+        } catch (error) {
+            console.error('Error al obtener las locaciones:', error);
+        }
+    };
+
+    // Maneja los cambios en el formulario
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setEventData({
@@ -32,12 +65,6 @@ const FormularioEvento = () => {
         });
         setError('');
     };
-    
-    useEffect(() => {
-        if (!isLoggedIn) {
-            navigate(-1);
-        }
-    }, [isLoggedIn, navigate]);
 
     // Maneja la solicitud para crear el evento
     const handleSubmit = async (e) => {
@@ -52,11 +79,7 @@ const FormularioEvento = () => {
         }
 
         let formattedStartDate = `${eventData.date}T${eventData.time}`;
-
-        
-        formattedStartDate = formattedStartDate +":00"
-        console.log(formattedStartDate); 
-
+        formattedStartDate = formattedStartDate + ":00";  // Aseguramos el formato correcto
 
         const formattedEventData = {
             name: eventData.name,
@@ -67,10 +90,8 @@ const FormularioEvento = () => {
             duration_in_minutes: parseInt(eventData.duration_in_minutes),
             price: parseFloat(eventData.price),
             enabled_for_enrollment: eventData.enabled_for_enrollment,
-            max_assistance: parseInt(eventData.max_assistance)
+            max_assistance: parseInt(eventData.max_assistance),
         };
-
-        console.log(formattedEventData);
 
         try {
             const response = await axios.post(`${config.url}api/event`, formattedEventData, {
@@ -78,9 +99,7 @@ const FormularioEvento = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            console.log(response);
             setSuccess('¡Evento creado con éxito!');
-        
             // Resetea el formulario
             setEventData({
                 name: '',
@@ -94,7 +113,6 @@ const FormularioEvento = () => {
                 enabled_for_enrollment: false,
                 max_assistance: '',
             });
-            console.log(eventData);
         } catch (error) {
             if (error.response) {
                 if (error.response.status === 401) {
@@ -118,8 +136,8 @@ const FormularioEvento = () => {
             <form onSubmit={handleSubmit}>
                 {error && <div className="alert alert-danger">{error}</div>}
                 {success && <div className="alert alert-success">{success}</div>}
-                
-                {/* Todos los campos del formulario */}
+
+                {/* Campos del formulario */}
                 <FormInput
                     label="Nombre del Evento"
                     type="text"
@@ -138,24 +156,27 @@ const FormularioEvento = () => {
                     placeholder="Ingresa una descripción del evento"
                     className="form-control"
                 />
-                <FormInput
-                    label="Categoría del Evento"
-                    type="text"
-                    name="id_event_category"
+                
+                {/* Dropdown de categorías */}
+                <Dropdown 
+                    label="Categoría"
+                    placeholder="Seleccione una Categoría"
                     value={eventData.id_event_category}
-                    onChange={handleChange}
-                    placeholder="Ingresa la categoría del evento"
-                    className="form-control"
+                    onChange={(e) => setEventData({...eventData, id_event_category: e.target.value})}
+                    options={categories}
+                    required
                 />
-                <FormInput
-                    label="Ubicación del Evento"
-                    type="text"
-                    name="id_event_location"
+
+                {/* Dropdown de locaciones */}
+                <Dropdown 
+                    label="Ubicación"
+                    placeholder="Seleccione una Locación"
                     value={eventData.id_event_location}
-                    onChange={handleChange}
-                    placeholder="Ingresa la ubicación del evento"
-                    className="form-control"
+                    onChange={(e) => setEventData({...eventData, id_event_location: e.target.value})}
+                    options={locations}
+                    required
                 />
+
                 <FormInput
                     label="Fecha"
                     type="date"
