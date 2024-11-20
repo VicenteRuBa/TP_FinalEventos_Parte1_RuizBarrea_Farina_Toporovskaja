@@ -33,6 +33,7 @@ function CreateEvent() {
 
   // Obtener categorías de la API
   const fetchCategories = async () => {
+    console.log(token)
     try {
       const response = await axios.get(`${config.url}api/event-category?limit=100&offset=0`, {
         headers: {

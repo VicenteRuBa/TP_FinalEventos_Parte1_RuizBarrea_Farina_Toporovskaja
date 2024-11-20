@@ -4,6 +4,7 @@ import FormInput from "../../components/FormInput";
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext";
 import config from '../../config';
+import Cookies from 'js-cookie';
 import Dropdown from '../../components/Dropdown/dropdown';
 
 const FormularioEvento = () => {
@@ -25,6 +26,8 @@ const FormularioEvento = () => {
     const [success, setSuccess] = useState('');
     const { isLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+
 
     // Obtener categorías y locaciones
     useEffect(() => {
@@ -34,7 +37,7 @@ const FormularioEvento = () => {
             fetchCategories();
             fetchLocations();
         }
-    }, [isLoggedIn, navigate]);
+    }, [isLoggedIn, token, navigate]);
 
     // Obtener categorías desde la API
     const fetchCategories = async () => {
@@ -48,15 +51,23 @@ const FormularioEvento = () => {
 
     // Obtener locaciones desde la API
     const fetchLocations = async () => {
+        console.log(token)
         try {
-            const response = await axios.get(`${config.url}api/event-location?limit=100&offset=0`); 
+            const response = await axios.get(`${config.url}api/event-location?limit=100&offset=0`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,  // Autenticación con token
+                },
+              });
+              console.log(response)
             setLocations(response.data.collection);
+            console.log(locations);
         } catch (error) {
             console.error('Error al obtener las locaciones:', error);
+            
         }
     };
     
-
+ 
     // Maneja los cambios en el formulario
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
