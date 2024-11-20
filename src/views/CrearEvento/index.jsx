@@ -49,12 +49,13 @@ const FormularioEvento = () => {
     // Obtener locaciones desde la API
     const fetchLocations = async () => {
         try {
-            const response = await axios.get(`${config.url}api/event-location?limit=100&offset=0`);
+            const response = await axios.get(`${config.url}api/event-location?limit=100&offset=0`); 
             setLocations(response.data.collection);
         } catch (error) {
             console.error('Error al obtener las locaciones:', error);
         }
     };
+    
 
     // Maneja los cambios en el formulario
     const handleChange = (e) => {
