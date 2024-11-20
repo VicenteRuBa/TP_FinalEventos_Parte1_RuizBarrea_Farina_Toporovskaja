@@ -4,6 +4,7 @@ import FormInput from "../../components/FormInput";
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext";
 import config from '../../config';
+import './styles.css';
 import Dropdown from '../../components/Dropdown/dropdown';
 
 const FormularioEvento = () => {
@@ -159,13 +160,14 @@ const FormularioEvento = () => {
                 />
                 
                 {/* Dropdown de categorías */}
-                <Dropdown 
+                <Dropdown
                     label="Categoría"
                     placeholder="Seleccione una Categoría"
                     value={eventData.id_event_category}
-                    onChange={(e) => setEventData({...eventData, id_event_category: e.target.value})}
+                    onChange={(e) => setEventData({ ...eventData, id_event_category: e.target.value })}
                     options={categories}
                     required
+                    className="custom-dropdown" // Clase CSS personalizada
                 />
 
                 {/* Dropdown de locaciones */}
@@ -176,6 +178,7 @@ const FormularioEvento = () => {
                     onChange={(e) => setEventData({...eventData, id_event_location: e.target.value})}
                     options={locations}
                     required
+                    className="custom-dropdown" // Clase CSS personalizada
                 />
 
                 <FormInput

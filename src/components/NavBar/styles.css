@@ -53,3 +53,8 @@
 .login-button:hover {
     text-decoration: underline;
 }
+.user-info span {
+    color: #b59434;
+    font-size: 14px; 
+    font-weight: bold; 
+}
