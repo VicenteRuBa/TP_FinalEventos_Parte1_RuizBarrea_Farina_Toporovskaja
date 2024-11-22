@@ -26,7 +26,6 @@ const ListadoEventos = () => {
         localStorage.setItem("navigationHistory", false);
     }, []);
 
-    // Función para obtener los eventos
     const fetchEvents = async () => {
         const { name = '', tag = '', category = '' } = filters;
         let queryParams = [];
@@ -95,23 +94,19 @@ const ListadoEventos = () => {
         navigate('/crearEvento');
     };
 
-    // Función para filtrar los eventos basados en los filtros aplicados
     const filterEvents = (event) => {
         const { name, tag, category } = filters;
 
-        // Normaliza el texto (minúsculas) para la comparación insensible a mayúsculas
         const lowerName = event.name ? event.name.toLowerCase() : '';
         const lowerDescription = event.description ? event.description.toLowerCase() : '';
         const lowerCategory = event.event_category?.name ? event.event_category.name.toLowerCase() : '';
         const lowerLocation = event.event_location?.full_address ? event.event_location.full_address.toLowerCase() : '';
         const lowerTags = event.tags ? event.tags.map(t => t.name.toLowerCase()).join(' ') : '';
 
-        // Verifica si los filtros coinciden con las propiedades del evento (sin importar mayúsculas/minúsculas)
         const matchesName = name ? lowerName.includes(name.toLowerCase()) : true;
         const matchesCategory = category ? lowerCategory.includes(category.toLowerCase()) : true;
         const matchesTag = tag ? lowerTags.includes(tag.toLowerCase()) : true;
 
-        // Asegura que si al menos uno de los filtros tiene texto, el filtro se aplique correctamente.
         return matchesName && matchesCategory && matchesTag;
     };
 
@@ -172,6 +167,9 @@ const ListadoEventos = () => {
                                 </div>
                                 <div>
                                     <Link to={`/detalleevento/${event.id}`}>Ver detalle</Link>
+                                    <Link to={`/editarEvento/${event.id}`}>
+                                      <br></br><br></br>  Editar
+                                    </Link>
                                 </div>
                             </li>
                         </div>

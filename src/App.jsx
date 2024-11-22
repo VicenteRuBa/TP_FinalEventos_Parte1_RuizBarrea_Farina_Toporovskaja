@@ -24,7 +24,7 @@ function App() {
           <Route exact path="/register" element={<Registro />} />
           <Route exact path="/event/" element={<ListadoEventos />} /> 
           <Route exact path="/detalleevento/:id" element={<DetalleEvento />} />
-          <Route exact path="/event/edit/:id" element={<EditarEvento />} />
+          <Route exact path="/editarEvento/:id" element={<EditarEvento />} />
           <Route exact path="/crearEvento" element={<CrearEvento/>}/>
 
         </Routes>   
