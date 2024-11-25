@@ -6,11 +6,10 @@ import "./styles.css";
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext";
 
-// Listado de Eventos
 const ListadoEventos = () => {
     const [events, setEvents] = useState([]);
     const [page, setPage] = useState(1);
-    const [limit] = useState(2);
+    const [limit] = useState(4);
     const [total, setTotal] = useState(0);
     const [filters, setFilters] = useState({
         tag: '',
@@ -41,8 +40,6 @@ const ListadoEventos = () => {
         queryParams.push(`limit=${limit}`);
 
         const queryString = queryParams.length ? `?${queryParams.join('&')}` : '';
-        console.log('Fetching data with query:', `${config.url}api/event${queryString}`);
-
         try {
             const response = await axios.get(`${config.url}api/event${queryString}`);
             const eventsData = response?.data?.collection || [];
@@ -70,8 +67,8 @@ const ListadoEventos = () => {
     };
 
     const handleApplyFilters = () => {
-        setPage(1);  
-        setApplyFilters(!applyFilters); 
+        setPage(1);
+        setApplyFilters(!applyFilters);
     };
 
     const handleNextPage = () => {
@@ -100,7 +97,6 @@ const ListadoEventos = () => {
         const lowerName = event.name ? event.name.toLowerCase() : '';
         const lowerDescription = event.description ? event.description.toLowerCase() : '';
         const lowerCategory = event.event_category?.name ? event.event_category.name.toLowerCase() : '';
-        const lowerLocation = event.event_location?.full_address ? event.event_location.full_address.toLowerCase() : '';
         const lowerTags = event.tags ? event.tags.map(t => t.name.toLowerCase()).join(' ') : '';
 
         const matchesName = name ? lowerName.includes(name.toLowerCase()) : true;
@@ -167,9 +163,7 @@ const ListadoEventos = () => {
                                 </div>
                                 <div>
                                     <Link to={`/detalleevento/${event.id}`}>Ver detalle</Link>
-                                    <Link to={`/editarEvento/${event.id}`}>
-                                      <br></br><br></br>  Editar
-                                    </Link>
+                                    <Link to={`/editarEvento/${event.id}`}>Editar</Link>
                                 </div>
                             </li>
                         </div>

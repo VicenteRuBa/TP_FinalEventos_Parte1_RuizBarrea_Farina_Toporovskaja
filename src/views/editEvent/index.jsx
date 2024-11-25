@@ -1,150 +1,142 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import config from '../../config';
-import Cookies from 'js-cookie';
+import { AuthContext } from "../../AuthContext";
 
-function EditEvent() {
-  const { id } = useParams();  // Obtener el ID del evento desde la URL
-  const navigate = useNavigate();
-  const [event, setEvent] = useState(null);  // Estado para el evento actual
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [duration, setDuration] = useState('');
-  const [price, setPrice] = useState('');
-  const [maxAssistance, setMaxAssistance] = useState('');
-  const [enabledForEnrollment, setEnabledForEnrollment] = useState(false);
-  const [message, setMessage] = useState('');
+const EditarEvento = () => {
+    const { id } = useParams();
+    const [formData, setFormData] = useState({
+        name: '',
+        description: '',
+        start_date: '',
+        duration_in_minutes: '',
+        price: '',
+    });
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const { isLoggedIn } = useContext(AuthContext);
 
-  const userId = Cookies.get('userId');
-  const token = Cookies.get('token');
+    useEffect(() => {
+        const fetchEventDetail = async () => {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await axios.get(`${config.url}api/event/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-  useEffect(() => {
-    fetchEventDetails();  // Cargar los detalles del evento cuando el componente se monta
-  }, []);
+                const event = response.data[0];
+                setFormData({
+                    name: event.name,
+                    description: event.description,
+                    start_date: event.start_date.split('T')[0], // Formatear fecha para el input
+                    duration_in_minutes: event.duration_in_minutes,
+                    price: event.price,
+                });
+            } catch (error) {
+                console.error('Error fetching event details:', error);
+                setErrorMessage('Error al cargar los detalles del evento.');
+            }
+        };
 
-  // Función para obtener los detalles del evento
-  const fetchEventDetails = async () => {
-    try {
-      const response = await axios.get(`${config.url}/api/event/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const eventData = response.data;
+        fetchEventDetail();
+    }, [id, isLoggedIn]);
 
-      // Verificar si el usuario es el creador del evento
-      if (eventData.id_creator_user !== userId) {
-        navigate('/');  // Redirigir a home si no es el creador
-      }
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
+    };
 
-      // Actualizar el estado con los datos del evento
-      setEvent(eventData);
-      setName(eventData.name);
-      setDescription(eventData.description);
-      setStartDate(eventData.start_date);
-      setDuration(eventData.duration_in_minutes);
-      setPrice(eventData.price);
-      setMaxAssistance(eventData.max_assistance);
-      setEnabledForEnrollment(eventData.enabled_for_enrollment);
-    } catch (error) {
-      console.error('Error al obtener los detalles del evento:', error);
-      navigate('/');  // Redirigir si hay un error al obtener el evento
-    }
-  };
+    const handleSaveChanges = async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        try {
+            const response = await axios.put(`${config.url}api/event/${id}`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-  // Función para manejar el envío del formulario de modificación
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+            if (response.status === 200) {
+                setSuccessMessage('Evento actualizado correctamente.');
+                setErrorMessage('');
+            }
+        } catch (error) {
+            console.error('Error updating event:', error);
+            setErrorMessage('Error al actualizar el evento. Por favor, inténtelo de nuevo.');
+            setSuccessMessage('');
+        }
+    };
 
-    try {
-      const response = await axios.put(`${config.url}/api/event/${id}`, {
-        name,
-        description,
-        start_date: startDate,
-        duration_in_minutes: duration,
-        price,
-        max_assistance: maxAssistance,
-        enabled_for_enrollment: enabledForEnrollment,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    return (
+        <div className="event-edit-container">
+            <h1 className="event-title">Editar Evento</h1>
+            <form onSubmit={handleSaveChanges}>
+                <div className="form-group">
+                    <label htmlFor="name">Nombre del Evento:</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="description">Descripción:</label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="start_date">Fecha de Inicio:</label>
+                    <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        value={formData.start_date}
+                        onChange={handleInputChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="duration_in_minutes">Duración (minutos):</label>
+                    <input
+                        type="number"
+                        id="duration_in_minutes"
+                        name="duration_in_minutes"
+                        value={formData.duration_in_minutes}
+                        onChange={handleInputChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="price">Precio:</label>
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleInputChange}
+                        required
+                    />
+                </div>
+                <button type="submit" className="save-button">Guardar Cambios</button>
+            </form>
+            {successMessage && <p className="success-message">{successMessage}</p>}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
+        </div>
+    );
+};
 
-      setMessage('Evento modificado exitosamente');
-      setTimeout(() => navigate('/'), 2000);  // Redirigir al home después de 2 segundos
-    } catch (error) {
-      setMessage('Error al modificar el evento');
-      console.error('Error al modificar el evento:', error);
-    }
-  };
-
-  return (
-    <div>
-      <h1>Modificar Evento</h1>
-      {event ? (
-        <form onSubmit={handleSubmit}>
-          <input 
-            type="text" 
-            placeholder="Nombre del Evento" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <input 
-            type="text" 
-            placeholder="Descripción" 
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-          <input 
-            type="datetime-local" 
-            placeholder="Fecha de Inicio" 
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-          />
-          <input 
-            type="number" 
-            placeholder="Duración (en minutos)" 
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            required
-          />
-          <input 
-            type="number" 
-            placeholder="Precio" 
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-          <input 
-            type="number" 
-            placeholder="Capacidad Máxima" 
-            value={maxAssistance}
-            onChange={(e) => setMaxAssistance(e.target.value)}
-            required
-          />
-          <label>
-            <input 
-              type="checkbox"
-              checked={enabledForEnrollment}
-              onChange={(e) => setEnabledForEnrollment(e.target.checked)}
-            />
-            Habilitar inscripciones
-          </label>
-
-          <button type="submit">Guardar Cambios</button>
-        </form>
-      ) : (
-        <p>Cargando detalles del evento...</p>
-      )}
-      {message && <p>{message}</p>}
-    </div>
-  );
-}
-
-export default EditEvent;
+export default EditarEvento;
