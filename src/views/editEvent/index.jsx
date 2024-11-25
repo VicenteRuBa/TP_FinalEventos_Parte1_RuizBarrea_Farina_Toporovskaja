@@ -11,6 +11,7 @@ const EditarEvento = () => {
         description: '',
         start_date: '',
         duration_in_minutes: '',
+        time: '',
         price: '',
     });
     const [errorMessage, setErrorMessage] = useState('');
@@ -26,13 +27,15 @@ const EditarEvento = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-
+                let formattedStartDate = `${formData.date}T${formData.time}`;
+                formattedStartDate = formattedStartDate + ":00";  // Aseguramos el formato correcto
                 const event = response.data[0];
                 setFormData({
                     name: event.name,
                     description: event.description,
-                    start_date: event.start_date.split('T')[0], // Formatear fecha para el input
+                    start_date: formattedStartDate, // Formatear fecha para el input
                     duration_in_minutes: event.duration_in_minutes,
+
                     price: event.price,
                 });
             } catch (error) {
@@ -107,6 +110,17 @@ const EditarEvento = () => {
                         value={formData.start_date}
                         onChange={handleInputChange}
                         required
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="start_date">Hora</label>
+                    <input
+                        abel="Hora"
+                        type="time"
+                        name="time"
+                        value={formData.time}
+                        onChange={handleInputChange}
+                        className="form-control"
                     />
                 </div>
                 <div className="form-group">
