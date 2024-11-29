@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import config from '../../config';
 import FormInput from '../../components/FormInput';
-import "./styles.css";
+import "./styles.css";  
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext";
 
@@ -105,6 +105,28 @@ const ListadoEventos = () => {
 
         return matchesName && matchesCategory && matchesTag;
     };
+    const buttonContainerStyle = {
+        display: 'flex',
+        gap: '16px', // Espaciado entre botones
+        marginTop: '10px',
+    };
+
+    const buttonStyle = {
+        padding: '8px 16px',
+        border: '1px solid #007bff',
+        borderRadius: '4px',
+        textDecoration: 'none',
+        color: '#fff',
+        backgroundColor: '#007bff',
+        fontSize: '14px',
+        textAlign: 'center',
+        transition: 'background-color 0.3s ease',
+    };
+
+    const buttonHoverStyle = {
+        ...buttonStyle,
+        backgroundColor: '#0056b3',
+    };
 
     return (
         <div className="event-list">
@@ -161,7 +183,7 @@ const ListadoEventos = () => {
                                     <p>Fecha de inicio: {new Date(event.start_date).toLocaleString()}</p>
                                     <p>Tags: {event.tags ? event.tags.map(tag => tag.name).join(', ') : 'N/A'}</p>
                                 </div>
-                                <div>
+                                <div style={buttonContainerStyle}>
                                     <Link to={`/detalleevento/${event.id}`}>Ver detalle</Link>
                                     <Link to={`/editarEvento/${event.id}`}>Editar</Link>
                                 </div>
