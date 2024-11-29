@@ -30,6 +30,7 @@ const DetalleEvento = () => {
                 setIsSubscribed(isUserSubscribed); // Establecer si el usuario está suscrito
             } catch (error) {
                 console.error('Error fetching event details:', error);
+                setErrorMessage('Error al cargar los detalles del evento.');
             }
         };
 
@@ -39,14 +40,26 @@ const DetalleEvento = () => {
     const handleSubscriptionToggle = async (e) => {
         e.preventDefault();
         if (!ifIsLoggedIn()) {
+            setErrorMessage('Debes iniciar sesión para suscribirte o desuscribirte.');
             return;
         }
 
         const token = localStorage.getItem('token');
+
+        if (isSubscribed) {
+            const confirmUnsubscribe = window.confirm("¿Estás seguro de que quieres desuscribirte?");
+            if (!confirmUnsubscribe) {
+                return;
+            }
+        }
+
         const endpoint = isSubscribed ? 'unsubscription' : 'enrollment'; // Cambiar según el estado de suscripción
+        const method = isSubscribed ? 'delete' : 'post';
 
         try {
-            const response = await axios.post(`${config.url}api/event/${id}/${endpoint}`, {}, {
+            const response = await axios({
+                method: method,
+                url: `${config.url}api/event/${id}/${endpoint}`,
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -57,7 +70,13 @@ const DetalleEvento = () => {
                 setErrorMessage(''); // Limpiar mensaje de error si la acción fue exitosa
             }
         } catch (error) {
-            if (error.response?.data === "El usuario ya se encuentra registrado en el evento") {
+            console.error('Error toggling subscription:', error);
+            setErrorMessage(
+                isSubscribed
+                    ? 'Error al desuscribirte. Por favor, intenta nuevamente.'
+                    : 'Error al suscribirte. Por favor, intenta nuevamente.'
+            );
+            if (error.response?.data === "El usuario ya se encuentra registrado en el evento :)") {
                 setIsSubscribed(true); // Si ya está inscrito, cambiar el estado a "suscrito"
                 setErrorMessage("Ya estás inscrito en este evento.");
             } else {
