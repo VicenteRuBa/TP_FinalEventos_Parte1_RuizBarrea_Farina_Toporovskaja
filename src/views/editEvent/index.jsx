@@ -12,6 +12,7 @@ const EditarEvento = () => {
     const { isLoggedIn } = useContext(AuthContext);
 
     const [formData, setFormData] = useState({
+        id: "",
         name: '',
         description: '',
         date: '',
@@ -22,6 +23,7 @@ const EditarEvento = () => {
         id_event_location: '',
         enabled_for_enrollment: false,
         max_assistance: '',
+        //HAY QUE AGREGAR EL ID DE USUARIO.
     });
 
     const [categories, setCategories] = useState([]);
@@ -56,8 +58,9 @@ const EditarEvento = () => {
     
             // Validar si event contiene todas las propiedades requeridas
             const [date, time] = event.start_date?.split('T') || ['', ''];
-    
+            console.log(event);
             setFormData({
+                id: event.id || '',
                 name: event.name || '',
                 description: event.description || '',
                 date: date || '',
@@ -68,6 +71,7 @@ const EditarEvento = () => {
                 id_event_location: event.id_event_location?.toString() || '',
                 enabled_for_enrollment: !!event.enabled_for_enrollment,
                 max_assistance: event.max_assistance?.toString() || '',
+                //HAY QUE AGREGAR EL ID DE USUARIO.
             });
         } catch (error) {
             console.error('Error al cargar los detalles del evento:', error);
@@ -117,6 +121,7 @@ const EditarEvento = () => {
             const formattedStartDate = `${formData.date}T${formData.time}:00`;
     
             const updatedData = {
+                id: formData.id,
                 name: formData.name,
                 description: formData.description,
                 start_date: formattedStartDate,
@@ -126,11 +131,13 @@ const EditarEvento = () => {
                 price: parseFloat(formData.price),
                 enabled_for_enrollment: formData.enabled_for_enrollment,
                 max_assistance: parseInt(formData.max_assistance, 10),
+                //HAY QUE AGREGAR EL ID DE USUARIO.
+
             };
     
             console.log('Datos enviados al servidor:', updatedData);
     
-            const response = await axios.put(`${config.url}api/event/${id}`, updatedData, {
+            const response = await axios.put(`${config.url}api/event`, updatedData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
     
