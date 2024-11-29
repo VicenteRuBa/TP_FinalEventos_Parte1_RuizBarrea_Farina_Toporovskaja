@@ -54,6 +54,13 @@ const InicioSesion = () => {
                 if (response.data.success) {
                     console.log('Inicio de sesión exitoso');
                     localStorage.setItem("token", response.data.token);
+                    const username = await axios.get(`${config.url}api/user/username`,{
+                        headers: {
+                            Authorization: `Bearer ${response.data.token}`,
+                        },
+                    })
+                    console.log("useranme",username)
+                    localStorage.setItem("username",username.data.username)
                     console.log('Token guardado en localStorage:', response.data.token);
                     navigate("/"); 
                     window.location.reload();

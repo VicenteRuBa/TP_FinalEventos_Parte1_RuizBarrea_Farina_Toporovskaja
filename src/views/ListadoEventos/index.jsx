@@ -20,6 +20,8 @@ const ListadoEventos = () => {
     const [applyFilters, setApplyFilters] = useState(false);
     const { ifIsLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
+    //const userId = JSON.parse(localStorage.getItem('user'))?.id;
+    const userName = localStorage.getItem("username")
 
     useEffect(() => {
         localStorage.setItem("navigationHistory", false);
@@ -184,8 +186,25 @@ const ListadoEventos = () => {
                                     <p>Tags: {event.tags ? event.tags.map(tag => tag.name).join(', ') : 'N/A'}</p>
                                 </div>
                                 <div style={buttonContainerStyle}>
-                                    <Link to={`/detalleevento/${event.id}`}>Ver detalle</Link>
-                                    <Link to={`/editarEvento/${event.id}`}>Editar</Link>
+                                    <Link
+                                        to={`/detalleevento/${event.id}`}
+                                        style={buttonStyle}
+                                        onMouseOver={(e) => (e.target.style.backgroundColor = '#0056b3')}
+                                        onMouseOut={(e) => (e.target.style.backgroundColor = '#007bff')}
+                                    >
+                                        Ver detalle
+                                    </Link>
+                                    {console.log("u",userName)}
+                                    {(event.creator_user.username === userName) && (
+                                        <Link
+                                            to={`/editarEvento/${event.id}`}
+                                            style={buttonStyle}
+                                            onMouseOver={(e) => (e.target.style.backgroundColor = '#0056b3')}
+                                            onMouseOut={(e) => (e.target.style.backgroundColor = '#007bff')}
+                                        >
+                                            Editar
+                                        </Link>
+                                    )}
                                 </div>
                             </li>
                         </div>
