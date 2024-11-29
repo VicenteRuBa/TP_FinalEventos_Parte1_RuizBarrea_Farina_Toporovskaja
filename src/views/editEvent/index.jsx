@@ -32,6 +32,7 @@ const EditarEvento = () => {
     const [successMessage, setSuccessMessage] = useState('');
 
     const token = localStorage.getItem('token');
+    const userId = JSON.parse(localStorage.getItem('user'))?.id; // Obtener id del usuario
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -131,7 +132,7 @@ const EditarEvento = () => {
                 price: parseFloat(formData.price),
                 enabled_for_enrollment: formData.enabled_for_enrollment,
                 max_assistance: parseInt(formData.max_assistance, 10),
-                //HAY QUE AGREGAR EL ID DE USUARIO.
+                id_creator_user: userId, // Incluyendo id del usuario
 
             };
     
